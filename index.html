@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+    <title>Taskflow — Smart Task Manager</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap"
+        rel="stylesheet" />
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <div id="app">
+
+        <!-- Topbar -->
+        <div class="topbar">
+            <div class="logo"><span class="logo-dot"></span>taskflow</div>
+            <div class="stats-row">
+                <div class="stat-pill"><span id="stat-total">0</span> tasks</div>
+                <div class="stat-pill"><span id="stat-done">0</span> done</div>
+                <div class="stat-pill"><span id="stat-pct">0%</span></div>
+            </div>
+        </div>
+
+        <!-- Alerts -->
+        <div class="alerts-toggle" onclick="toggleAlerts()">
+            <span id="alerts-toggle-label">Smart alerts</span>
+            <span id="alert-count-badge" class="alert-count-badge" style="display:none">0</span>
+            <span style="margin-left:auto;" id="alerts-chevron">▾</span>
+        </div>
+        <div class="alerts-panel" id="alerts-panel" style="display:none;">
+            <div id="alerts-list"></div>
+        </div>
+
+        <!-- Main -->
+        <div class="main">
+
+            <!-- Sidebar (desktop) -->
+            <div class="sidebar">
+                <div class="sidebar-label">Views</div>
+                <div class="nav-item active" data-view="all" onclick="setView('all')">
+                    <div class="nav-left"><span class="nav-icon">◉</span> All tasks</div>
+                    <div class="badge" id="badge-all">0</div>
+                </div>
+                <div class="nav-item" data-view="today" onclick="setView('today')">
+                    <div class="nav-left"><span class="nav-icon">◷</span> Today</div>
+                    <div class="badge" id="badge-today">0</div>
+                </div>
+                <div class="nav-item" data-view="overdue" onclick="setView('overdue')">
+                    <div class="nav-left"><span class="nav-icon">⚠</span> Overdue</div>
+                    <div class="badge" id="badge-overdue">0</div>
+                </div>
+                <div class="nav-item" data-view="done" onclick="setView('done')">
+                    <div class="nav-left"><span class="nav-icon">✓</span> Done</div>
+                    <div class="badge" id="badge-done">0</div>
+                </div>
+                <div class="sidebar-label" style="margin-top:10px;">Priority</div>
+                <div class="nav-item" data-view="high" onclick="setView('high')">
+                    <div class="nav-left"><span class="nav-icon" style="color:var(--red);">●</span> High</div>
+                    <div class="badge" id="badge-high">0</div>
+                </div>
+                <div class="nav-item" data-view="medium" onclick="setView('medium')">
+                    <div class="nav-left"><span class="nav-icon" style="color:var(--amber);">●</span> Medium</div>
+                    <div class="badge" id="badge-medium">0</div>
+                </div>
+                <div class="nav-item" data-view="low" onclick="setView('low')">
+                    <div class="nav-left"><span class="nav-icon" style="color:var(--blue);">●</span> Low</div>
+                    <div class="badge" id="badge-low">0</div>
+                </div>
+                <div class="sidebar-label" style="margin-top:10px;">Progress</div>
+                <div style="padding:0 18px;">
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progress-fill" style="width:0%"></div>
+                    </div>
+                    <div style="font-family:var(--mono);font-size:10px;color:var(--muted);margin-top:5px;"
+                        id="progress-label">0 of 0 done</div>
+                </div>
+            </div>
+
+            <!-- Content -->
+            <div class="content">
+                <div class="toolbar">
+                    <input id="search-input" placeholder="Search tasks..." oninput="renderTasks()" />
+                    <div class="filter-tabs">
+                        <div class="filter-tab active" data-sort="date" onclick="setSort('date')">Date</div>
+                        <div class="filter-tab" data-sort="priority" onclick="setSort('priority')">Priority</div>
+                        <div class="filter-tab" data-sort="alpha" onclick="setSort('alpha')">A–Z</div>
+                    </div>
+                    <button class="btn primary" onclick="openModal()">+ Add</button>
+                </div>
+                <div class="task-list" id="task-list"></div>
+            </div>
+        </div>
+
+        <!-- Bottom nav (mobile only) -->
+        <div class="bottom-nav">
+            <div class="bottom-nav-inner">
+                <div class="bnav-item active" data-view="all" onclick="setView('all');setBnav(this)"> <span
+                        class="bnav-icon">◉</span><span>All</span></div>
+                <div class="bnav-item" data-view="today" onclick="setView('today');setBnav(this)"> <span
+                        class="bnav-icon">◷</span><span>Today</span></div>
+                <div class="bnav-item" data-view="overdue" onclick="setView('overdue');setBnav(this)"><span
+                        class="bnav-icon">⚠</span><span>Overdue</span><span class="bnav-badge" id="mobile-overdue-badge"
+                        style="display:none">0</span></div>
+                <div class="bnav-item" data-view="done" onclick="setView('done');setBnav(this)"> <span
+                        class="bnav-icon">✓</span><span>Done</span></div>
+                <div class="bnav-item" data-view="high" onclick="setView('high');setBnav(this)"> <span class="bnav-icon"
+                        style="color:var(--red);">●</span><span>High</span></div>
+                <div class="bnav-item" data-view="medium" onclick="setView('medium');setBnav(this)"> <span
+                        class="bnav-icon" style="color:var(--amber);">●</span><span>Med</span></div>
+                <div class="bnav-item" data-view="low" onclick="setView('low');setBnav(this)"> <span class="bnav-icon"
+                        style="color:var(--blue);">●</span><span>Low</span></div>
+                <div class="bnav-item" onclick="openModal()"> <span class="bnav-icon"
+                        style="color:var(--accent);">＋</span><span style="color:var(--accent);">Add</span></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add / Edit modal -->
+    <div class="modal-overlay" id="modal">
+        <div class="modal">
+            <div class="modal-handle"></div>
+            <h2 id="modal-title">New task</h2>
+            <div class="form-group">
+                <div class="form-label">Title</div>
+                <input class="form-input" id="f-title" placeholder="What needs to be done?" />
+            </div>
+            <div class="form-group">
+                <div class="form-label">Description</div>
+                <textarea class="form-textarea" id="f-desc" placeholder="Add details..."></textarea>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <div class="form-label">Priority</div>
+                    <select class="form-select" id="f-priority">
+                        <option value="high">High</option>
+                        <option value="medium" selected>Medium</option>
+                        <option value="low">Low</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <div class="form-label">Category</div>
+                    <select class="form-select" id="f-cat">
+                        <option>Work</option>
+                        <option>Personal</option>
+                        <option>Learning</option>
+                        <option>Health</option>
+                        <option>Finance</option>
+                        <option>Other</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="form-label">Due date</div>
+                <div class="date-picker-wrap">
+                    <div class="date-display" id="date-display" onclick="toggleDatePicker(event)">
+                        <span id="date-display-text" class="placeholder">Pick a date</span>
+                        <span style="color:var(--muted);font-size:13px;">▾</span>
+                    </div>
+                    <div class="date-picker-popup" id="date-picker-popup">
+                        <div class="dp-header">
+                            <button class="dp-nav" onclick="dpNav(-1)">&#8249;</button>
+                            <div class="dp-month-year" id="dp-month-year"></div>
+                            <button class="dp-nav" onclick="dpNav(1)">&#8250;</button>
+                        </div>
+                        <div class="dp-grid" id="dp-grid"></div>
+                        <button class="dp-clear" onclick="dpClear()">Clear date</button>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button class="btn" onclick="closeModal()">Cancel</button>
+                <button class="btn primary" onclick="saveTask()">Save task</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete confirmation modal -->
+    <div class="modal-overlay" id="confirm-modal">
+        <div class="modal confirm-modal">
+            <div class="modal-handle"></div>
+            <div class="confirm-icon" style="color:var(--red);">⊗</div>
+            <h2 style="text-align:center;">Delete task?</h2>
+            <div class="confirm-title" id="confirm-task-name"></div>
+            <div class="confirm-msg">This action cannot be undone. The task will be permanently removed.</div>
+            <div class="modal-actions" style="justify-content:center;gap:12px;margin-top:8px;">
+                <button class="btn" style="min-width:100px;" onclick="closeConfirm()">Cancel</button>
+                <button class="btn danger" style="min-width:100px;" onclick="confirmDelete()">Delete</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+
+</html>
